@@ -3,7 +3,7 @@ package main
 import (
     "github.com/xferd/golib/mono"
     "net/http"
-    "fmt"
+    "log"
 )
 
 type HomeController struct {
@@ -11,7 +11,10 @@ type HomeController struct {
 }
 
 func (c *HomeController)ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "homepage")
+    log.Println("homepage")
+    c.Assign("name", "xferd")
+    c.Assign("company", "Lenovo")
+    c.Display("/Users/leeyan/go/src/github.com/xferd/golib/template/index.tpl", w)
 }
 
 func main() {
