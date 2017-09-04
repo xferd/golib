@@ -27,7 +27,7 @@ func Handle(pattern string, controller IController) {
     serveMux.handle(pattern, controller)
 }
 
-func (mux *monoServeMux)controller(r *http.Request) (c IController, pattern string) {
+func (mux *monoServeMux)controller(w http.ResponseWriter, r *http.Request) (c IController, pattern string) {
     if nil == mux.m {
         return nil, ""
     }
@@ -39,9 +39,7 @@ func (mux *monoServeMux)controller(r *http.Request) (c IController, pattern stri
     }
 
     panic(404)
-    c = nil
-    pattern = ""
-    return
+    return nil, ""
 }
 
 func (mux *monoServeMux)handle(pattern string, controller IController) (e error) {
@@ -83,7 +81,7 @@ func (mux *monoServeMux)ServeHTTP(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusBadRequest)
         return
     }
-    c, _ := mux.controller(r)
+    c, _ := mux.controller(w, r)
     log.Println("controller:", c)
     c.ServeHTTP(w, r)
 }
