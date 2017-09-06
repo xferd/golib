@@ -4,6 +4,7 @@ import (
     "net"
     "strconv"
     "github.com/xferd/golib/types"
+    "fmt"
 )
 
 type redisServer struct {
@@ -44,8 +45,7 @@ func (this *redisServer)request(cmd string) (<- chan string, error) {
     if nil != err {
         return nil, err
     }
-    // response := make(chan string)
-    resp = response
+    response := make(chan string)
     go func() {
         c.Write([]byte(cmd))
         for {
@@ -59,4 +59,24 @@ func (this *redisServer)request(cmd string) (<- chan string, error) {
         }
     }()
     return response, nil
+}
+
+func buildCmd(cmd []types.Any) string {
+    str := fmt.Sprintf("*%d\r\n", len(cmd))
+    for c := range cmd {
+        switch t := c.(type) {
+        case string:
+            str += fmt.Sprintf("$%d\r\n%s\r\n", len(c), c)
+        default:
+            panic("unknown cmd type, " + t)
+        }
+    }
+    return str
+}
+
+func (this *redisServer)Get(key string) string {
+    cmd := []types.Any{"GET", key}
+    cmdString := buildCmd(cmd)
+    response, _ := this.request(cmdString)
+    return <-response
 }
