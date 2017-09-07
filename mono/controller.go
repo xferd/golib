@@ -6,6 +6,7 @@ import (
     "html/template"
     // "os"
     "log"
+    "path/filepath"
 )
 
 type IController interface {
@@ -19,6 +20,14 @@ type Controller struct {
     data map[string]Any
 }
 
+var (
+    viewPath string
+)
+
+func SetViewPath(path string) {
+    viewPath = path
+}
+
 func (c *Controller)Assign(key string, value Any) {
     if nil == c.data {
         c.data = make(map[string]Any)
@@ -27,12 +36,12 @@ func (c *Controller)Assign(key string, value Any) {
 }
 
 func (c *Controller)ViewPath(tplFile string) string {
-    return ""
-    // dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+    return viewPath + tplFile
 }
 
 func (c *Controller)Display(tplFile string, w http.ResponseWriter) {
-    tmpl, err := template.New("index.tpl").ParseFiles(tplFile)
+    tplname := filepath.Base(tplFile)
+    tmpl, err := template.New(tplname).ParseFiles(c.ViewPath(tplFile))
     if err != nil {
         log.Println(err)
     }

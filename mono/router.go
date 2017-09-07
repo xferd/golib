@@ -82,6 +82,5 @@ func (mux *monoServeMux)ServeHTTP(w http.ResponseWriter, r *http.Request) {
         return
     }
     c, _ := mux.controller(w, r)
-    log.Println("controller:", c)
     c.ServeHTTP(w, r)
 }

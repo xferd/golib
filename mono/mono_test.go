@@ -1,4 +1,4 @@
-package main
+package mono
 
 import (
     "github.com/xferd/golib/mono"
