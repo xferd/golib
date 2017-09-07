@@ -5,6 +5,7 @@ import (
     "strconv"
     "github.com/xferd/golib/types"
     "fmt"
+    "io"
 )
 
 type redisServer struct {
@@ -51,11 +52,11 @@ func (this *redisServer)request(cmd string) (<- chan string, error) {
         for {
             buf := make([]byte, 0, 4096)
             n, e := c.Read(buf)
-            if nil != e {
+            fmt.Println(n, e, buf[:n])
+            if io.EOF == e {
                 break;
             }
-
-            response <- string(buf[:n])
+            // response <- string(buf[:n])
         }
     }()
     return response, nil
@@ -63,12 +64,16 @@ func (this *redisServer)request(cmd string) (<- chan string, error) {
 
 func buildCmd(cmd []types.Any) string {
     str := fmt.Sprintf("*%d\r\n", len(cmd))
-    for c := range cmd {
-        switch t := c.(type) {
+    for _, c := range cmd {
+        switch c.(type) {
         case string:
-            str += fmt.Sprintf("$%d\r\n%s\r\n", len(c), c)
+            str += fmt.Sprintf("$%d\r\n%s\r\n", len(c.(string)), c)
+        // case int:
+        //     var ilen int = 0
+        //     for tmp := c.(int); ; tmp /= 10 {ilen++}
+        //     str += fmt.Sprintf(":%d\r\n%d\r\n", ilen, c.(int))
         default:
-            panic("unknown cmd type, " + t)
+            panic("unknown cmd type, ")
         }
     }
     return str
@@ -78,5 +83,9 @@ func (this *redisServer)Get(key string) string {
     cmd := []types.Any{"GET", key}
     cmdString := buildCmd(cmd)
     response, _ := this.request(cmdString)
-    return <-response
+    var respStr string
+    for r := range response {
+        fmt.Print(r)
+    }
+    return respStr
 }
