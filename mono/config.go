@@ -1,32 +1,50 @@
 package mono
 
 import (
-    . "github.com/xferd/golib/types"
-    "strings"
+    // . "github.com/xferd/golib/types"
+    // "strings"
+    "sync"
 )
 
-type t_conf map[string]*t_conf
+type t_conf map[string]*config
+
+type config struct {
+    conf *t_conf
+    val interface{}
+}
 
 var (
-    conf t_conf
+    global_conf config
+    mu_conf sync.RWMutex
 )
 
 func init() {
-    conf = make(t_conf)
+    global_conf = config{make(t_conf), nil}
 }
 
-func Ref(keyPath string) *t_conf {
-    var ref *t_conf = &conf
+func (this *config)ref(keyPath string) *t_conf {
+    mu_conf.Lock()
+    defer mu_conf.Unlock()
+
+    var conf t_conf = this.conf
     for _, k := range strings.Split(keyPath, ".") {
-        if _, ok := (*ref)[k]; !ok {
-            var _conf t_conf = make(t_conf)
-            (*ref)[k] = &_conf
+        if _, ok := (*conf)[k]; !ok {
+            (*conf)[k] = &make(t_conf)
         }
-        ref = (*ref)[k]
+
     }
-    return ref
+    return conf
 }
 
-func Set(keyPath string, val Any) {
-
+func Config() config {
+    return global_conf
 }
+
+func (this *config)Set(keyPath string, val interface{}) {
+    var ref *t_conf_map = this.ref(keyPath)
+}
+
+// func Conf(keyPath string) interface{} {
+//     var ref interface{} = Ref(keyPath)
+//     return ref
+// }
