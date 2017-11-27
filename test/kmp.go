@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "strings"
 )
 
 func getk(p string) (k []int) {
@@ -18,19 +19,23 @@ func getk(p string) (k []int) {
             k[i] = 0
         }
     }
-    return append([]int{-1}, k...)[:len(p)]
+    k = append([]int{-1}, k[:len(p) - 1]...)
+    return k
 }
 
 func kmp(s, p string) int {
     k := getk(p)
-    fmt.Println(k)
-    for i := 0; i < len(s) - len(p); i++ {
+    fmt.Println("k:", k)
+    for i := 0; i < len(s) - len(p); {
         found := true
-        fmt.Println(string(s[i:]))
-        for j, cp := range p {
-            if cp != rune(s[i + j]) {
+        for j, c := range p {
+            fmt.Println("i:", i, "j:", j)
+            fmt.Println(s)
+            fmt.Println(strings.Repeat(" ", i + j) + "^")
+            fmt.Println(strings.Repeat(" ", i) + p)
+            fmt.Println(strings.Repeat("=", len(s)))
+            if c != rune(s[i + j]) {
                 found = false
-                fmt.Println(i + j, string(s[i + j]), j, string(cp), k[j])
                 i = i + j - k[j]
                 break
             }
@@ -43,8 +48,8 @@ func kmp(s, p string) int {
 }
 
 func main() {
-    s := "acbabcabaaacdf"
-    p := "abcaba"
+    s := "BBC ABCDAB ABCDABCDABDE"
+    p := "ABCDABD"
     pos := kmp(s, p)
-    fmt.Println(s, p, pos)
+    fmt.Println("string:", s, "\npattern:", p, "\npos:", pos)
 }
